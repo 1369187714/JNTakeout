@@ -60,6 +60,7 @@ public class AliOssUtil {
                 .append(endpoint)
                 .append("/")
                 .append(objectName);
+        //https://web-tlisa-wen.https://oss-ap-northeast-2.aliyuncs.com/5bea8611-4ae5-41a0-9042-cca8e6271d41.jpg
 
         log.info("文件上传到:{}", stringBuilder.toString());
 
