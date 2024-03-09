@@ -110,4 +110,13 @@ public class DishServiceImpl implements DishService{
         }
     }
 
+    @Override
+    public List<Dish> list(Long categoryId) {
+        Dish dish = Dish.builder()
+                .categoryId(categoryId)
+                .status(StatusConstant.ENABLE)
+                .build();  //不仅要categoryId,还需要菜品目前状态为可用 才被select出来返回
+        return dishMapper.list(dish);
+    }
+
 }
