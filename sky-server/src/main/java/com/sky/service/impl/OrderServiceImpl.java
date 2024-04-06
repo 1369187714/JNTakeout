@@ -15,10 +15,7 @@ import com.sky.mapper.*;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
-import com.sky.vo.OrderPaymentVO;
-import com.sky.vo.OrderStatisticsVO;
-import com.sky.vo.OrderSubmitVO;
-import com.sky.vo.OrderVO;
+import com.sky.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,6 +188,76 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+    }
+
+    public PageResult pageQuery(int pageNum, int pageSize, Integer status) {
+        // 设置分页
+        PageHelper.startPage(pageNum, pageSize);
+
+        OrdersPageQueryDTO ordersPageQueryDTO = new OrdersPageQueryDTO();
+        ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
+        ordersPageQueryDTO.setStatus(status);
+
+        // 分页条件查询
+        Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
+
+        List<OrderVO> list = new ArrayList();
+
+        // 查询出订单明细，并封装入OrderVO进行响应
+        if (page != null && page.getTotal() > 0) {
+            for (Orders orders : page) {
+                Long orderId = orders.getId();// 订单id
+
+                // 查询订单明细
+                List<OrderDetail> orderDetails = orderDetailMapper.getByOrderId(orderId);
+
+                OrderVO orderVO = new OrderVO();
+                BeanUtils.copyProperties(orders, orderVO);
+                orderVO.setOrderDetailList(orderDetails);
+
+                list.add(orderVO);
+            }
+        }
+        return new PageResult(page.getTotal(), list);
+    }
+
+    public OrderVO details(Long id) {
+        List<OrderDetail> orderDetails = orderDetailMapper.getByOrderId(id);
+        Orders orders = orderMapper.getById(id);
+
+        OrderVO orderVO = new OrderVO();
+        orderVO.setOrderDetailList(orderDetails);
+        BeanUtils.copyProperties(orders, orderVO);
+
+        return orderVO;
+    }
+
+    public void cancel(Long id) {
+        Orders orders = orderMapper.getById(id);
+        // 校验订单是否存在
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        Integer status = orders.getStatus();
+        orders.setCancelReason("用户取消");
+        orders.setCancelTime(LocalDateTime.now());
+        //判断是否待支付 是则取消订单
+        if(status == Orders.PENDING_PAYMENT){
+            orders.setStatus(Orders.CANCELLED);
+            orderMapper.update(orders);
+        }else if (status == Orders.TO_BE_CONFIRMED) {
+            //判断是否待接单 是则取消订单并退款
+            orders.setStatus(Orders.CANCELLED);
+            //退款
+//            weChatPayUtil.refund(
+//                    orders.getNumber(), //商户订单号
+//                    orders.getNumber(), //商户退款单号
+//                    new BigDecimal(0.01),//退款金额，单位 元
+//                    new BigDecimal(0.01));//原订单金额
+            orders.setPayStatus(Orders.REFUND);
+        }else {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
     }
 
 }
