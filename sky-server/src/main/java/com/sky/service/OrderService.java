@@ -27,6 +27,8 @@ public interface OrderService {
     PageResult pageQuery(int page, int pageSize, Integer status);
 
     OrderVO details(Long id);
-
+    
+    void repetition(Long id);
+    
     void cancel(Long id);
 }

@@ -64,10 +64,12 @@ public class OrderController {
         return Result.success();
     }
 
-
-
-
-
+    @PostMapping("/repetition/{id}")
+    @ApiOperation("再来一单")
+    public Result repetiton(@PathVariable Long id){
+        orderService.repetition(id);
+        return Result.success();
+    }
 
 
 

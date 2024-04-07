@@ -232,6 +232,17 @@ public class OrderServiceImpl implements OrderService {
         return orderVO;
     }
 
+    public void repetition(Long id) {
+        ShoppingCartDTO shoppingCartDTO = new ShoppingCartDTO();
+        List<OrderDetail> details = orderDetailMapper.getByOrderId(id);
+        for (OrderDetail detail : details) {
+            for (int i = 0; i < detail.getNumber(); i++) {
+                BeanUtils.copyProperties(detail,shoppingCartDTO);
+                shoppingCartService.addShoppingCart(shoppingCartDTO);
+            }
+        }
+    }
+
     public void cancel(Long id) {
         Orders orders = orderMapper.getById(id);
         // 校验订单是否存在
