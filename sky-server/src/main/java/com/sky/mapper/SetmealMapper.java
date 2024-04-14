@@ -53,4 +53,5 @@ public interface SetmealMapper {
             "where sd.setmeal_id = #{setmealId}")
     List<DishItemVO> getDishItemBySetmealId(Long setmealId);
 
+    Integer getSetmealStatistics(Integer categoryId, Integer status);
 }
