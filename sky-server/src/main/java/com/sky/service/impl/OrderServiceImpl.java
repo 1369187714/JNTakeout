@@ -203,7 +203,7 @@ public class OrderServiceImpl implements OrderService {
         Map map = new HashMap();
         map.put("type", 1);//消息类型，1表示来单提醒
         map.put("orderId", orders.getId());
-        map.put("content", "订单号：" + outTradeNo);
+        map.put("content", "Order：" + outTradeNo);
 
         //通过WebSocket实现来单提醒，向客户端浏览器推送消息
         webSocketServer.sendToAllClient(JSON.toJSONString(map));
@@ -460,7 +460,7 @@ public class OrderServiceImpl implements OrderService {
         Map map = new HashMap();
         map.put("type", 2);//2代表用户催单
         map.put("orderId", id);
-        map.put("content", "订单号：" + orders.getNumber());
+        map.put("content", "Order：" + orders.getNumber());
         webSocketServer.sendToAllClient(JSON.toJSONString(map));
     }
 
